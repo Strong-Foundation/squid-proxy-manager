@@ -62,3 +62,81 @@ SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
 
 # Check if the squid proxy is installed
 if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
+
+  # Get the IPv4
+  function test-connectivity-v4() {
+    echo "How would you like to detect IPv4?"
+    echo "  1) Curl (Recommended)"
+    echo "  2) Custom (Advanced)"
+    until [[ "${SERVER_HOST_V4_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "IPv4 Choice [1-2]:" -e -i 1 SERVER_HOST_V4_SETTINGS
+    done
+    case ${SERVER_HOST_V4_SETTINGS} in
+    1)
+      SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      if [ -z "${SERVER_HOST_V4}" ]; then
+        SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+      fi
+      ;;
+    2)
+      read -rp "Custom IPv4:" SERVER_HOST_V4
+      if [ -z "${SERVER_HOST_V4}" ]; then
+        SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      fi
+      if [ -z "${SERVER_HOST_V4}" ]; then
+        SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+      fi
+      ;;
+    esac
+  }
+
+  # Get the IPv4
+  test-connectivity-v4
+
+  # Determine IPv6
+  function test-connectivity-v6() {
+    echo "How would you like to detect IPv6?"
+    echo "  1) Curl (Recommended)"
+    echo "  2) Custom (Advanced)"
+    until [[ "${SERVER_HOST_V6_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "IPv6 Choice [1-2]:" -e -i 1 SERVER_HOST_V6_SETTINGS
+    done
+    case ${SERVER_HOST_V6_SETTINGS} in
+    1)
+      SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      if [ -z "${SERVER_HOST_V6}" ]; then
+        SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+      fi
+      ;;
+    2)
+      read -rp "Custom IPv6:" SERVER_HOST_V6
+      if [ -z "${SERVER_HOST_V6}" ]; then
+        SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      fi
+      if [ -z "${SERVER_HOST_V6}" ]; then
+        SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+      fi
+      ;;
+    esac
+  }
+
+  # Get the IPv6
+  test-connectivity-v6
+
+  function install-squid-proxy() {
+    if [ ! -x "$(command -v squid)" ]; then
+      if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
+        apt-get install squid -y
+      elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
+        yum install squid -y
+      elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
+        pacman -S --noconfirm --needed squid
+      elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
+        apk add squid
+      elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
+        pkg install squid
+      fi
+    fi
+  }
+
+fi

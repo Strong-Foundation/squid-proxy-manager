@@ -47,57 +47,6 @@ See `.github/contributing.md` for ways to get started.
 Please adhere to this project's `.github/code_of_conduct.md`.
 
 
-## Lessons Learned
-
-What did you learn while building this project? What challenges did you face and how did you overcome them?
-
-
-## Optimizations
-
-What optimizations did you make in your code? E.g. refactors, performance improvements, accessibility
-
-
-## Related
-
-Here are some related projects
-
-- [Similar Project](https://github.com/github-actions/github-actions)
-
-
-## Run Locally
-
-Clone the project
-
-```bash
-  git clone https://github.com/github-actions/my-project
-```
-
-Go to the project directory
-
-```bash
-  cd my-project
-```
-
-Install dependencies
-
-```bash
-  npm install
-```
-
-Start the server
-
-```bash
-  npm run start
-```
-
-
-## Tech Stack
-
-**Client:** React, Redux, TailwindCSS
-
-**Server:** Node, Express
-
-
 ## Roadmap
 
 - Additional browser support

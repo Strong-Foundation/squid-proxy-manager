@@ -1,102 +1,31 @@
-# Project Title
+# squid-proxy-manager
 
-A brief description of what this project does and who it's for
+Easily create and manage squid proxies.
 
-***Project Title is not yet complete. You should not rely on this code. It has not undergone proper degrees of security auditing and the protocol is still subject to change. We're working toward a stable 1.0.0 release, but that time has not yet come. There are experimental snapshots tagged with "0.0.0.MM-DD-YYYY", but these should not be considered real releases and they may contain security vulnerabilities (which would not be eligible for CVEs, since this is pre-release snapshot software). If you are packaging Project Title, you must keep up to date with the snapshots.***
-
-## Acknowledgements
-
- - [example.com](https://www.example.com)
- - [example.org](https://www.example.org)
- - [example.net](https://www.example.net)
-
-
-## API Reference
-
-#### Get all items
-
-```http
-  GET /api/items
-```
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `api_key` | `string` | **Required**. Your API key |
-
-#### Get item
-
-```http
-  GET /api/items/${id}
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `id`      | `string` | **Required**. Id of item to fetch |
-
-#### add(num1, num2)
-
-Takes two numbers and returns the sum.
-
-
-## Appendix
-
-Any additional information goes here
-
-
-## Badges
-
-Add badges from somewhere like: [shields.io](https://shields.io/)
-
-[![Github Repo File Count](https://img.shields.io/github/directory-file-count/github-actions/github-actions)
-[![Github Repo Size](https://img.shields.io/github/languages/code-size/github-actions/github-actions)
-[![Github Contributors](https://img.shields.io/github/all-contributors/github-actions/github-actions)
-
+***squid-proxy-manager is not yet complete. You should not rely on this code. It has not undergone proper degrees of security auditing and the protocol is still subject to change. We're working toward a stable 1.0.0 release, but that time has not yet come. There are experimental snapshots tagged with "0.0.0.MM-DD-YYYY", but these should not be considered real releases and they may contain security vulnerabilities (which would not be eligible for CVEs, since this is pre-release snapshot software). If you are packaging squid-proxy-manager, you must keep up to date with the snapshots.***
 
 ## Features
 
-- Light/dark mode toggle
-- Live previews
-- Fullscreen mode
-- Cross platform
-
-
-## Demo
-
-Insert gif or link to demo
-
+- 
+- 
 
 ## Installation
 
-Install my-project with npm
+Lets first use `curl` and save the file in `/usr/local/bin/`
 
-```bash
-  npm install my-project
-  cd my-project
+```
+curl https://raw.githubusercontent.com/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh --create-dirs -o /usr/local/bin/squid-proxy-manager.sh
 ```
 
-
-## Deployment
-
-To deploy this project run
-
-```bash
-  npm run deploy
+Then let's make the script user executable
+```
+chmod +x /usr/local/bin/squid-proxy-manager.sh
 ```
 
-
-## Documentation
-
-[Documentation](https://www.example.com/docs)
-
-
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`API_KEY`
-
-`ANOTHER_API_KEY`
-
+It's finally time to execute the script
+```
+bash /usr/local/bin/squid-proxy-manager.sh
+```
 
 ## FAQ
 
@@ -169,26 +98,6 @@ Start the server
 **Server:** Node, Express
 
 
-## Running Tests
-
-To run tests, run the following command
-
-```bash
-  npm run test
-```
-
-
-## Usage/Examples
-
-```javascript
-import Component from 'my-project'
-
-function App() {
-  return <Component />
-}
-```
-
-
 ## Roadmap
 
 - Additional browser support
@@ -198,7 +107,7 @@ function App() {
 
 ## Authors
 
-- [@github-actions](https://github.com/github-actions)
+- [@prajwal-koirala](https://github.com/prajwal-koirala)
 
 
 ## Support
@@ -213,17 +122,4 @@ Please utilize the github repo conversations to offer feedback.
 
 ## License
 
-[Apache License Version 2.0](https://github.com/github-actions/github-actions/blob/main/.github/license)
-
-
-## Screenshots
-
-![App Screenshot](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
-
-
-## Used By
-
-This project is used by the following companies:
-
-- Company 1
-- Company 2
+[Apache License Version 2.0](https://github.com/complexorganizations/squid-proxy-manager/blob/main/.github/license)

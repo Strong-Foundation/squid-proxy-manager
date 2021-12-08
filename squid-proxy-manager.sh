@@ -63,6 +63,54 @@ SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
 # Check if the squid proxy is installed
 if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
+  # Custom IPv4 subnet
+  function set-ipv4-subnet() {
+    echo "What IPv4 subnet do you want to use?"
+    echo "  1) 10.0.0.0/8 (Recommended)"
+    echo "  2) Custom (Advanced)"
+    until [[ "${IPV4_SUBNET_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "Subnet Choice [1-2]:" -e -i 1 IPV4_SUBNET_SETTINGS
+    done
+    case ${IPV4_SUBNET_SETTINGS} in
+    1)
+      IPV4_SUBNET="10.0.0.0/8"
+      ;;
+    2)
+      read -rp "Custom IPv4 Subnet:" IPV4_SUBNET
+      if [ -z "${IPV4_SUBNET}" ]; then
+        IPV4_SUBNET="10.0.0.0/8"
+      fi
+      ;;
+    esac
+  }
+
+  # Custom IPv4 Subnet
+  set-ipv4-subnet
+
+  # Custom IPv6 subnet
+  function set-ipv6-subnet() {
+    echo "What IPv6 subnet do you want to use?"
+    echo "  1) fd00:00:00::0/8 (Recommended)"
+    echo "  2) Custom (Advanced)"
+    until [[ "${IPV6_SUBNET_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "Subnet Choice [1-2]:" -e -i 1 IPV6_SUBNET_SETTINGS
+    done
+    case ${IPV6_SUBNET_SETTINGS} in
+    1)
+      IPV6_SUBNET="fd00:00:00::0/8"
+      ;;
+    2)
+      read -rp "Custom IPv6 Subnet:" IPV6_SUBNET
+      if [ -z "${IPV6_SUBNET}" ]; then
+        IPV6_SUBNET="fd00:00:00::0/8"
+      fi
+      ;;
+    esac
+  }
+
+  # Custom IPv6 Subnet
+  set-ipv6-subnet
+
   # Get the IPv4
   function test-connectivity-v4() {
     echo "How would you like to detect IPv4?"

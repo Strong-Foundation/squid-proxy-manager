@@ -63,54 +63,6 @@ SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
 # Check if the squid proxy is installed
 if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
-  # Custom IPv4 subnet
-  function set-ipv4-subnet() {
-    echo "What IPv4 subnet do you want to use?"
-    echo "  1) 10.0.0.0/8 (Recommended)"
-    echo "  2) Custom (Advanced)"
-    until [[ "${IPV4_SUBNET_SETTINGS}" =~ ^[1-2]$ ]]; do
-      read -rp "Subnet Choice [1-2]:" -e -i 1 IPV4_SUBNET_SETTINGS
-    done
-    case ${IPV4_SUBNET_SETTINGS} in
-    1)
-      IPV4_SUBNET="10.0.0.0/8"
-      ;;
-    2)
-      read -rp "Custom IPv4 Subnet:" IPV4_SUBNET
-      if [ -z "${IPV4_SUBNET}" ]; then
-        IPV4_SUBNET="10.0.0.0/8"
-      fi
-      ;;
-    esac
-  }
-
-  # Custom IPv4 Subnet
-  set-ipv4-subnet
-
-  # Custom IPv6 subnet
-  function set-ipv6-subnet() {
-    echo "What IPv6 subnet do you want to use?"
-    echo "  1) fd00:00:00::0/8 (Recommended)"
-    echo "  2) Custom (Advanced)"
-    until [[ "${IPV6_SUBNET_SETTINGS}" =~ ^[1-2]$ ]]; do
-      read -rp "Subnet Choice [1-2]:" -e -i 1 IPV6_SUBNET_SETTINGS
-    done
-    case ${IPV6_SUBNET_SETTINGS} in
-    1)
-      IPV6_SUBNET="fd00:00:00::0/8"
-      ;;
-    2)
-      read -rp "Custom IPv6 Subnet:" IPV6_SUBNET
-      if [ -z "${IPV6_SUBNET}" ]; then
-        IPV6_SUBNET="fd00:00:00::0/8"
-      fi
-      ;;
-    esac
-  }
-
-  # Custom IPv6 Subnet
-  set-ipv6-subnet
-
   # Get the IPv4
   function test-connectivity-v4() {
     echo "How would you like to detect IPv4?"
@@ -185,6 +137,93 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
         pkg install squid
       fi
     fi
+  }
+
+  function configure-squid-proxy() {
+    //
+  }
+
+else
+
+  function configure-after-installation() {
+    echo "What do you want to do?"
+    echo "1) Start Squid Proxy"
+    echo "2) Stop Squid Proxy"
+    echo "3) Restart Squid Proxy"
+    echo "4) Add a user to squid proxy"
+    echo "5) Remove a user from squid proxy"
+    echo "6) Reinstall Squid"
+    echo "7) Uninstall Squid"
+    echo "8) Update this script"
+    echo "9) Backup Squid"
+    echo "10) Restore Squid"
+    echo "11) Update Interface IP"
+    echo "12) Update Interface Port"
+    echo "13) Purge WireGuard Peers"
+    echo "14) Generate QR Code"
+    until [[ "${SQUID_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_OPTIONS}" -ge 1 ] && [ "${SQUID_OPTIONS}" -le 14 ]; do
+      read -rp "Select an Option [1-14]:" -e -i 0 SQUID_OPTIONS
+    done
+    case ${SQUID_OPTIONS} in
+    1) # Start Squid
+      if [ -x "$(command -v service)" ]; then
+        service squid restart
+      elif [ -x "$(command -v systemctl)" ]; then
+        systemctl enable squid
+        systemctl restart squid
+      fi
+      ;;
+    2) # Stop Squid
+      if [ -x "$(command -v service)" ]; then
+        service squid stop
+      elif [ -x "$(command -v systemctl)" ]; then
+        systemctl stop squid
+      fi
+      ;;
+    3) # Restart Squid
+      if [ -x "$(command -v service)" ]; then
+        service squid restart
+      elif [ -x "$(command -v systemctl)" ]; then
+        systemctl restart squid
+      fi
+      ;;
+    4) # Add a squid user
+      echo "add a user"
+      ;;
+    5) # Remove a user
+      echo "remove a user"
+      ;;
+    6) # Reinstall squid
+      if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
+        apt-get --reinstall install squid -y
+      elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
+        yum reinstall squid -y
+      elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
+        pacman -S --noconfirm squid
+      elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
+        apk fix squid
+      elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
+        pkg check squid
+      fi
+      ;;
+    7) # Reinstall squid
+      if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
+        apt-get remove squid -y
+      elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
+        yum remove squid -y
+      elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
+        pacman -Rs --noconfirm squid
+      elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
+        apk del squid
+      elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
+        pkg delete squid
+      fi
+      ;;
+    8)
+      curl ${WIREGUARD_MANAGER_UPDATE} -o "${CURRENT_FILE_PATH}"
+      chmod +x "${CURRENT_FILE_PATH}"
+      ;;
+    esac
   }
 
 fi

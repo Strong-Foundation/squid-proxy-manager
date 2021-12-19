@@ -58,8 +58,7 @@ installing-system-requirements
 # Global variables
 SQUID_PROXY_DIRECTORY="/etc/squid"
 SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
-SQUID_EXTERNAL_CONFIG_DIRECTORY="${SQUID_PROXY_DIRECTORY}/conf.d"
-SQUID_BLOCKED_DOMAIN_PATH="${SQUID_EXTERNAL_CONFIG_DIRECTORY}/blocked-domains.acl"
+SQUID_BLOCKED_DOMAIN_PATH="${SQUID_PROXY_DIRECTORY}/blocked-domains.acl"
 SQUID_USERS_DATABASE="${SQUID_PROXY_DIRECTORY}/users"
 case $(shuf -i1-4 -n1) in
 1)
@@ -244,12 +243,14 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   }
 
   function configure-squid-proxy() {
-    echo "http_port ${SERVER_PORT}
-http_access deny all
-http_access allow authenticated
-auth_param basic credentialsttl 24 hours
-acl authenticated proxy_auth REQUIRED
+    echo "acl safe_ports port 80
+acl safe_ports port 443
+http_access allow safe_ports
+http_access allow all
 auth_param basic program /usr/lib/squid/basic_ncsa_auth ${SQUID_USERS_DATABASE}
+acl authenticated proxy_auth REQUIRED
+http_access allow authenticated
+http_port ${SERVER_PORT}
 via off
 forwarded_for delete
 follow_x_forwarded_for deny all
@@ -257,7 +258,7 @@ access_log none
 cache_store_log none
 cache_log /dev/null" >${SQUID_CONFIG_PATH}
     if [ "${BLOCK_TRACKERS_AND_ADS}" == true ]; then
-      echo "acl blocked_domains dstdomain ${SQUID_BLOCKED_DOMAIN_PATH}
+      echo "acl blocked_domains dstdomain \"${SQUID_BLOCKED_DOMAIN_PATH}\"
 http_access deny blocked_domains" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi

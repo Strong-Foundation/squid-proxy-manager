@@ -62,19 +62,18 @@ SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
 SQUID_EXTERNAL_CONFIG_DIRECTORY="${SQUID_PROXY_DIRECTORY}/conf.d"
 SQUID_BLOCKED_DOMAIN_PATH="${SQUID_EXTERNAL_CONFIG_DIRECTORY}/blocked-domains.acl"
 SQUID_USERS_DATABASE="${SQUID_PROXY_DIRECTORY}/users"
-
 case $(shuf -i1-4 -n1) in
 1)
-  UNBOUND_CONFIG_HOST_URL="https://raw.githubusercontent.com/complexorganizations/content-blocker/main/assets/hosts"
+  SQUID_BLOCKED_DOMAIN_URL="https://raw.githubusercontent.com/complexorganizations/content-blocker/main/assets/hosts"
   ;;
 2)
-  UNBOUND_CONFIG_HOST_URL="https://cdn.statically.io/gh/complexorganizations/content-blocker/main/assets/hosts"
+  SQUID_BLOCKED_DOMAIN_URL="https://cdn.statically.io/gh/complexorganizations/content-blocker/main/assets/hosts"
   ;;
 3)
-  UNBOUND_CONFIG_HOST_URL="https://cdn.jsdelivr.net/gh/complexorganizations/content-blocker/assets/hosts"
+  SQUID_BLOCKED_DOMAIN_URL="https://cdn.jsdelivr.net/gh/complexorganizations/content-blocker/assets/hosts"
   ;;
 4)
-  UNBOUND_CONFIG_HOST_URL="https://combinatronics.io/complexorganizations/content-blocker/main/assets/hosts"
+  SQUID_BLOCKED_DOMAIN_URL="https://combinatronics.io/complexorganizations/content-blocker/main/assets/hosts"
   ;;
 esac
 
@@ -216,7 +215,7 @@ http_access allow squid_users" >${SQUID_CONFIG_PATH}
     if [ "${BLOCK_TRACKERS_AND_ADS}" == true ]; then
       echo "acl blocked_url dstdomain ${SQUID_BLOCKED_DOMAIN_PATH}
 http_access deny blocked_url" >>${SQUID_CONFIG_PATH}
-      curl "${UNBOUND_CONFIG_HOST_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
+      curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
   }
 
@@ -319,10 +318,10 @@ else
       fi
       ;;
     11)
-      echo "Update Interface Port"
+      sed -i "s|current_port|new_port|" ${SQUID_CONFIG_PATH}
       ;;
     12)
-      echo "Purge Squid Users"
+      echo "" >${SQUID_USERS_DATABASE}
       ;;
     13)
       echo "Generate QR Code"

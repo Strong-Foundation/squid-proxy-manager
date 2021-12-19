@@ -215,17 +215,18 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   }
 
   function configure-squid-proxy() {
-    echo "via off
+    echo "http_port ${SERVER_PORT}
+http_access deny all
+http_access allow authenticated
+auth_param basic credentialsttl 24 hours
+acl authenticated proxy_auth REQUIRED
+auth_param basic program /usr/lib/squid/basic_ncsa_auth ${SQUID_USERS_DATABASE}
+via off
 forwarded_for delete
 follow_x_forwarded_for deny all
 access_log none
 cache_store_log none
-cache_log /dev/null
-http_access allow all
-auth_param basic program /usr/local/squid/bin/ncsa_auth ${SQUID_USERS_DATABASE}
-acl squid_users proxy_auth REQUIRED
-http_access allow squid_users
-http_port ${SERVER_PORT}" >${SQUID_CONFIG_PATH}
+cache_log /dev/null" >${SQUID_CONFIG_PATH}
     if [ "${BLOCK_TRACKERS_AND_ADS}" == true ]; then
       echo "acl blocked_url dstdomain ${SQUID_BLOCKED_DOMAIN_PATH}
 http_access deny blocked_url" >>${SQUID_CONFIG_PATH}

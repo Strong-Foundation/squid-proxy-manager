@@ -318,7 +318,7 @@ else
       fi
       ;;
     11)
-      sed -i "s|current_port|new_port|" ${SQUID_CONFIG_PATH}
+      sed -i "s|current_port|new_port|g" ${SQUID_CONFIG_PATH}
       ;;
     12)
       echo "" >${SQUID_USERS_DATABASE}

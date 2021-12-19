@@ -180,6 +180,35 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   # Get the IPv6
   test-connectivity-v6
+  
+  # What IP version would you like to be available on this WireGuard server?
+  function ipvx-select() {
+    echo "What IPv do you want to use to connect to the WireGuard server?"
+    echo "  1) IPv4 (Recommended)"
+    echo "  2) IPv6"
+    until [[ "${SERVER_HOST_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "IP Choice [1-2]:" -e -i 1 SERVER_HOST_SETTINGS
+    done
+    case ${SERVER_HOST_SETTINGS} in
+    1)
+      if [ -n "${SERVER_HOST_V4}" ]; then
+        SERVER_HOST="${SERVER_HOST_V4}"
+      else
+        SERVER_HOST="[${SERVER_HOST_V6}]"
+      fi
+      ;;
+    2)
+      if [ -n "${SERVER_HOST_V6}" ]; then
+        SERVER_HOST="[${SERVER_HOST_V6}]"
+      else
+        SERVER_HOST="${SERVER_HOST_V4}"
+      fi
+      ;;
+    esac
+  }
+
+  # IPv4 or IPv6 Selector
+  ipvx-select
 
   function block-trackers-and-ads() {
     echo "Do you want to block trackers and ads?"

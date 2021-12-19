@@ -11,9 +11,15 @@ jobs:
       - name: Check out code into the directory
         uses: actions/checkout@v2
       - name: Install squid proxy server
-        run: sudo ./squid-proxyy-manager.sh --install
+        run: sudo ./squid-proxy-manager.sh --install
       - name: View the resolv.conf
         run: sudo cat /etc/resolv.conf
+      - name: View the squid.conf
+        run: sudo cat /etc/squid/squid.conf
+      - name: View the blocked-domains.acl
+        run: sudo cat /etc/squid/conf.d/blocked-domains.acl
+      - name: View the users
+        run: sudo cat /etc/squid/users
       - name: Test the local network.
         run: |
           curl -I https://www.example.com

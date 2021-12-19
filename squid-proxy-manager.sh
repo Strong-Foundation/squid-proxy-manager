@@ -19,7 +19,6 @@ function system-information() {
     source /etc/os-release
     CURRENT_DISTRO=${ID}
     CURRENT_DISTRO_VERSION=${VERSION_ID}
-    CURRENT_KERNEL_VERSION=$(uname -r | cut -d'.' -f1-2)
   fi
 }
 
@@ -74,6 +73,20 @@ case $(shuf -i1-4 -n1) in
   ;;
 4)
   SQUID_BLOCKED_DOMAIN_URL="https://combinatronics.io/complexorganizations/content-blocker/main/assets/hosts"
+  ;;
+esac
+case $(shuf -i1-4 -n1) in
+1)
+  SQUID_MANAGER_UPDATE_URL="https://raw.githubusercontent.com/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh"
+  ;;
+2)
+  SQUID_MANAGER_UPDATE_URL="https://cdn.statically.io/gh/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh"
+  ;;
+3)
+  SQUID_MANAGER_UPDATE_URL="https://cdn.jsdelivr.net/gh/complexorganizations/squid-proxy-manager/squid-proxy-manager.sh"
+  ;;
+4)
+  SQUID_MANAGER_UPDATE_URL="https://combinatronics.io/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh"
   ;;
 esac
 
@@ -301,8 +314,16 @@ else
       fi
       ;;
     8)
-      curl "${WIREGUARD_MANAGER_UPDATE}" -o "${CURRENT_FILE_PATH}"
+      curl "${SQUID_MANAGER_UPDATE_URL}" -o "${CURRENT_FILE_PATH}"
       chmod +x "${CURRENT_FILE_PATH}"
+      if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
+        curl "${SQUID_BLOCKED_DOMAIN_URL}" -o "${SQUID_BLOCKED_DOMAIN_PATH}"
+        if [ -x "$(command -v service)" ]; then
+            service squid restart
+        elif [ -x "$(command -v systemctl)" ]; then
+            systemctl restart squid
+        fi
+      fi
       ;;
     9)
       if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then

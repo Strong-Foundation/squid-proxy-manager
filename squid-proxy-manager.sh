@@ -224,7 +224,8 @@ cache_log /dev/null
 http_access allow all
 auth_param basic program /usr/local/squid/bin/ncsa_auth ${SQUID_USERS_DATABASE}
 acl squid_users proxy_auth REQUIRED
-http_access allow squid_users" >${SQUID_CONFIG_PATH}
+http_access allow squid_users
+http_port ${SERVER_PORT}" >${SQUID_CONFIG_PATH}
     if [ "${BLOCK_TRACKERS_AND_ADS}" == true ]; then
       echo "acl blocked_url dstdomain ${SQUID_BLOCKED_DOMAIN_PATH}
 http_access deny blocked_url" >>${SQUID_CONFIG_PATH}

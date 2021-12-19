@@ -43,7 +43,7 @@ function installing-system-requirements() {
         apk add curl coreutils jq iproute2 lsof cronie gawk procps grep qrencode sed zip unzip openssl iptables bc gnupg
       elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
         pkg update
-        pkg install curl coreutils jq iproute2 lsof cronie gawk procps grep qrencode sed zip unzip openssl iptables bc gnupg 
+        pkg install curl coreutils jq iproute2 lsof cronie gawk procps grep qrencode sed zip unzip openssl iptables bc gnup
       fi
     fi
   else
@@ -278,7 +278,7 @@ else
     4) # Add a squid user
       SQUID_USERNAME="$(openssl rand -hex 25)"
       SQUID_PASSWORD="$(openssl rand -hex 25)"
-      echo "${SQUID_USERNAME}:$(openssl passwd -crypt "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+      echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
       echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
       ;;
     5) # Remove a user
@@ -319,9 +319,9 @@ else
       if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
         curl "${SQUID_BLOCKED_DOMAIN_URL}" -o "${SQUID_BLOCKED_DOMAIN_PATH}"
         if [ -x "$(command -v service)" ]; then
-            service squid restart
+          service squid restart
         elif [ -x "$(command -v systemctl)" ]; then
-            systemctl restart squid
+          systemctl restart squid
         fi
       fi
       ;;

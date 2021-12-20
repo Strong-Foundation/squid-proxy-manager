@@ -89,6 +89,113 @@ case $(shuf -i1-4 -n1) in
   ;;
 esac
 
+# Usage for squid manager
+function usage-guide() {
+  echo "usage: ./$(basename "${0}") <command>"
+  echo "  --install     Install Squid Proxy"
+  echo "  --start       Start Squid Proxy"
+  echo "  --stop        Stop Squid Proxy"
+  echo "  --restart     Restart Squid Proxy"
+  echo "  --list        Show Squid Proxy(s)"
+  echo "  --add         Add Squid Proxy User"
+  echo "  --remove      Remove Squid Proxy User"
+  echo "  --reinstall   Reinstall Squid Proxy"
+  echo "  --uninstall   Uninstall Squid Proxy"
+  echo "  --update      Update Squid Proxy manager"
+  echo "  --ddns        Update squid proxy ip."
+  echo "  --backup      Backup Squid Proxy"
+  echo "  --restore     Restore Squid Proxy"
+  echo "  --purge       Purge Squid Proxy Clients"
+  echo "  --help        Show Usage Guide"
+}
+
+# The usage of the script
+function usage() {
+  while [ $# -ne 0 ]; do
+    case ${1} in
+    --install)
+      shift
+      HEADLESS_INSTALL=${HEADLESS_INSTALL:-true}
+      ;;
+    --start)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-2}
+      ;;
+    --stop)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-3}
+      ;;
+    --restart)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-4}
+      ;;
+    --list)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-1}
+      ;;
+    --add)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-5}
+      ;;
+    --remove)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-6}
+      ;;
+    --reinstall)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-7}
+      ;;
+    --uninstall)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-8}
+      ;;
+    --update)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-9}
+      ;;
+    --backup)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-10}
+      ;;
+    --restore)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-11}
+      ;;
+    --ddns)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-12}
+      ;;
+    --purge)
+      shift
+      SQUID_MANAGER_OPTIONS=${SQUID_MANAGER_OPTIONS:-14}
+      ;;
+    --help)
+      shift
+      usage-guide
+      ;;
+    *)
+      echo "Invalid argument: ${1}"
+      usage-guide
+      exit
+      ;;
+    esac
+  done
+}
+
+usage "$@"
+
+# All questions are skipped, and wireguard is installed and a configuration is generated.
+function headless-install() {
+  if [ "${HEADLESS_INSTALL}" == true ]; then
+    INTERFACE_OR_PEER=${INTERFACE_OR_PEER:-1}
+    IPV4_SUBNET_SETTINGS=${IPV4_SUBNET_SETTINGS:-1}
+  fi
+}
+
+# No GUI
+headless-install
+
+
 # Check if the squid proxy is installed
 if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 

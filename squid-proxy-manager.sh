@@ -198,7 +198,6 @@ function headless-install() {
 # No GUI
 headless-install
 
-
 # Check if the squid proxy is installed
 if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
@@ -289,7 +288,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   # Get the IPv6
   test-connectivity-v6
-  
+
   # What IP version would you like to be available on this WireGuard server?
   function ipvx-select() {
     echo "What IPv do you want to use to connect to the WireGuard server?"
@@ -335,7 +334,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       ;;
     esac
   }
-  
+
   block-trackers-and-ads
 
   function install-squid-proxy() {
@@ -353,7 +352,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       fi
     fi
   }
-  
+
   install-squid-proxy
 
   function configure-squid-proxy() {
@@ -376,12 +375,12 @@ cache_log /dev/null" >${SQUID_CONFIG_PATH}
 http_access deny blocked_domains" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
-      SQUID_USERNAME="$(openssl rand -hex 25)"
-      SQUID_PASSWORD="$(openssl rand -hex 25)"
-      echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
-      echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+    SQUID_USERNAME="$(openssl rand -hex 25)"
+    SQUID_PASSWORD="$(openssl rand -hex 25)"
+    echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+    echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
   }
-  
+
   configure-squid-proxy
 
 else

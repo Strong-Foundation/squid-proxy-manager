@@ -438,7 +438,7 @@ else
       echo "Which Squid proxy would you like to remove?"
       awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
       read -rp "Peer's name:" REMOVECLIENT
-      # sed -i "/^${REMOVECLIENT}$/d" ${SQUID_USERS_DATABASE}
+      sed -i "/${REMOVECLIENT}/d" ${SQUID_USERS_DATABASE}
       ;;
     6) # Reinstall squid
       if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then

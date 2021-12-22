@@ -350,6 +350,8 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       fi
     fi
   }
+  
+  install-squid-proxy
 
   function configure-squid-proxy() {
     echo "acl safe_ports port 80

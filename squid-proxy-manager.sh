@@ -431,10 +431,14 @@ else
       SQUID_USERNAME="$(openssl rand -hex 25)"
       SQUID_PASSWORD="$(openssl rand -hex 25)"
       echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+      qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
       echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
       ;;
     5) # Remove a user
+      echo "Which Squid proxy would you like to remove?"
       awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
+      read -rp "Peer's name:" REMOVECLIENT
+      # sed -i "/^${REMOVECLIENT}$/d" ${SQUID_USERS_DATABASE}
       ;;
     6) # Reinstall squid
       if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then

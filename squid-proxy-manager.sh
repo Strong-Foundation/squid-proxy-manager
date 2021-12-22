@@ -493,15 +493,15 @@ else
       ;;
     10)
       if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
-      if [ -f "${SQUID_CONFIG_PATH}" ]; then
-      rm -f ${SQUID_CONFIG_PATH}
-      fi
-      if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
-      rm -f ${SQUID_BLOCKED_DOMAIN_PATH}
-      fi
-      if [ -f "${SQUID_USERS_DATABASE}" ]; then
-      rm -f ${SQUID_USERS_DATABASE}
-      fi
+        if [ -f "${SQUID_CONFIG_PATH}" ]; then
+          rm -f ${SQUID_CONFIG_PATH}
+        fi
+        if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
+          rm -f ${SQUID_BLOCKED_DOMAIN_PATH}
+        fi
+        if [ -f "${SQUID_USERS_DATABASE}" ]; then
+          rm -f ${SQUID_USERS_DATABASE}
+        fi
         unzip ${SQUID_CONFIG_BACKUP} -d ${SQUID_PROXY_DIRECTORY}
       fi
       ;;

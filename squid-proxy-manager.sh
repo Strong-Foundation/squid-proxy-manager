@@ -187,7 +187,7 @@ function usage() {
 
 usage "$@"
 
-# All questions are skipped, and wireguard is installed and a configuration is generated.
+# All questions are skipped, and squid is installed and a configuration is generated.
 function headless-install() {
   if [ "${HEADLESS_INSTALL}" == true ]; then
     SERVER_PORT_SETTINGS=${SERVER_PORT_SETTINGS:-1}
@@ -292,9 +292,9 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   # Get the IPv6
   test-connectivity-v6
 
-  # What IP version would you like to be available on this WireGuard server?
+  # What IP version would you like to be available on this squid server?
   function ipvx-select() {
-    echo "What IPv do you want to use to connect to the WireGuard server?"
+    echo "What IPv do you want to use to connect to the squid server?"
     echo "  1) IPv4 (Recommended)"
     echo "  2) IPv6"
     until [[ "${SERVER_HOST_SETTINGS}" =~ ^[1-2]$ ]]; do

@@ -187,7 +187,6 @@ usage "$@"
 # All questions are skipped, and wireguard is installed and a configuration is generated.
 function headless-install() {
   if [ "${HEADLESS_INSTALL}" == true ]; then
-    INTERFACE_OR_PEER=${INTERFACE_OR_PEER:-1}
     SERVER_PORT_SETTINGS=${SERVER_PORT_SETTINGS:-1}
     SERVER_HOST_V4_SETTINGS=${SERVER_HOST_V4_SETTINGS:-1}
     SERVER_HOST_V6_SETTINGS=${SERVER_HOST_V6_SETTINGS:-1}

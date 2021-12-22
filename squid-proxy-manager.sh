@@ -60,6 +60,9 @@ SQUID_PROXY_DIRECTORY="/etc/squid"
 SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
 SQUID_BLOCKED_DOMAIN_PATH="${SQUID_PROXY_DIRECTORY}/blocked-domains.acl"
 SQUID_USERS_DATABASE="${SQUID_PROXY_DIRECTORY}/users"
+SQUID_BACKUP_PASSWORD_PATH="${HOME}/.squid-proxy-manager"
+SYSTEM_BACKUP_PATH="/var/backups"
+SQUID_CONFIG_BACKUP="${SYSTEM_BACKUP_PATH}/squid-proxy-manager.zip"
 case $(shuf -i1-4 -n1) in
 1)
   SQUID_BLOCKED_DOMAIN_URL="https://raw.githubusercontent.com/complexorganizations/content-blocker/main/assets/hosts"
@@ -483,15 +486,23 @@ else
       ;;
     9)
       if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
-        tar -czf "${SQUID_PROXY_DIRECTORY}.tar.gz" "${SQUID_PROXY_DIRECTORY}"
+        BACKUP_PASSWORD="$(openssl rand -hex 100)"
+        echo "${BACKUP_PASSWORD}" >"${SQUID_BACKUP_PASSWORD_PATH}"
+        zip -P "${BACKUP_PASSWORD}" -rj ${SQUID_CONFIG_BACKUP} ${SQUID_CONFIG_PATH} ${SQUID_CONFIG_PATH} ${SQUID_BLOCKED_DOMAIN_PATH} ${SQUID_USERS_DATABASE}
       fi
       ;;
     10)
-      if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
-        rm -rf "${SQUID_PROXY_DIRECTORY}"
+      if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
+      if [ -f "${SQUID_CONFIG_PATH}" ]; then
+      rm -f ${SQUID_CONFIG_PATH}
       fi
-      if [ -f "${SQUID_PROXY_DIRECTORY}.tar.gz" ]; then
-        tar -xzf "${SQUID_PROXY_DIRECTORY}.tar.gz"
+      if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
+      rm -f ${SQUID_BLOCKED_DOMAIN_PATH}
+      fi
+      if [ -f "${SQUID_USERS_DATABASE}" ]; then
+      rm -f ${SQUID_USERS_DATABASE}
+      fi
+        unzip ${SQUID_CONFIG_BACKUP} -d ${SQUID_PROXY_DIRECTORY}
       fi
       ;;
     11)

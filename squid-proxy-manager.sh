@@ -378,6 +378,7 @@ http_access deny blocked_domains" >>${SQUID_CONFIG_PATH}
     SQUID_USERNAME="$(openssl rand -hex 25)"
     SQUID_PASSWORD="$(openssl rand -hex 25)"
     echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+    qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
     echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
   }
 

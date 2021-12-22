@@ -371,7 +371,13 @@ cache_log /dev/null" >${SQUID_CONFIG_PATH}
 http_access deny blocked_domains" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
+      SQUID_USERNAME="$(openssl rand -hex 25)"
+      SQUID_PASSWORD="$(openssl rand -hex 25)"
+      echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+      echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
   }
+  
+  configure-squid-proxy
 
 else
 

@@ -371,7 +371,7 @@ access_log none
 cache_store_log none
 cache_log /dev/null" >${SQUID_CONFIG_PATH}
     if [ "${BLOCK_TRACKERS_AND_ADS}" == true ]; then
-      echo "acl blocked_domains dstdomain \"${SQUID_BLOCKED_DOMAIN_PATH}\"
+      echo "acl blocked_domains dstdomain ${SQUID_BLOCKED_DOMAIN_PATH}
 http_access deny blocked_domains" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
@@ -501,5 +501,7 @@ else
       ;;
     esac
   }
+
+  configure-after-installation
 
 fi

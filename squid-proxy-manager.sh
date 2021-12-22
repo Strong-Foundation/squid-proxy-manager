@@ -191,6 +191,7 @@ function headless-install() {
     SERVER_HOST_V4_SETTINGS=${SERVER_HOST_V4_SETTINGS:-1}
     SERVER_HOST_V6_SETTINGS=${SERVER_HOST_V6_SETTINGS:-1}
     SERVER_HOST_SETTINGS=${SERVER_HOST_SETTINGS:-1}
+    BLOCK_TRACKERS_AND_ADS_SETTINGS=${BLOCK_TRACKERS_AND_ADS_SETTINGS:-1}
   fi
 }
 
@@ -334,6 +335,8 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       ;;
     esac
   }
+  
+  block-trackers-and-ads
 
   function install-squid-proxy() {
     if [ ! -x "$(command -v squid)" ]; then

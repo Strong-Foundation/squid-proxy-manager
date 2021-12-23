@@ -359,8 +359,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   install-squid-proxy
 
   function configure-squid-proxy() {
-    echo "acl safe_ports port 80
-acl safe_ports port 443
+    echo "acl safe_ports port 0-65535
 http_access allow safe_ports
 http_access allow all
 auth_param basic program /usr/lib/squid/basic_ncsa_auth ${SQUID_USERS_DATABASE}

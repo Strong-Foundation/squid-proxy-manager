@@ -201,7 +201,7 @@ function headless-install() {
   fi
 }
 
-# No GUI
+# Headless installation
 headless-install
 
 # Check if the squid proxy is installed

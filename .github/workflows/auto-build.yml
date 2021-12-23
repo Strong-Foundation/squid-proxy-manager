@@ -20,6 +20,8 @@ jobs:
         run: sudo ./squid-proxy-manager.sh --restart
       - name: Add a new squid proxy user
         run: echo -e "\n" | sudo ./squid-proxy-manager.sh --add
+      - name: Show the list of all squid users.
+        run: sudo ./squid-proxy-manager.sh --list
       - name: Test squid proxy ddns.
         run: sudo ./squid-proxy-manager.sh --ddns
       - name: Test squid proxy backup.
@@ -30,7 +32,7 @@ jobs:
         run: sudo cat /etc/squid/squid.conf
       - name: View the blocked-domains.acl
         run: sudo cat /etc/squid/blocked-domains.acl
-      - name: View the users
+      - name: View the squid users file.
         run: sudo cat /etc/squid/users
       - name: View the resolv.conf
         run: sudo cat /etc/resolv.conf

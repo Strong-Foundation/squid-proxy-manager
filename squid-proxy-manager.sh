@@ -340,8 +340,8 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   }
 
   block-trackers-and-ads
-  
-    # What would you like to name your first WireGuard peer?
+
+  # What would you like to name your first squid user?
   function client-name() {
     if [ -z "${SQUID_USERNAME}" ]; then
       echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
@@ -354,7 +354,6 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   # Client Name
   client-name
-
 
   function install-squid-proxy() {
     if [ ! -x "$(command -v squid)" ]; then
@@ -447,13 +446,13 @@ else
       fi
       ;;
     4) # Add a squid user
-    if [ -z "${SQUID_USERNAME}" ]; then
-      echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
-      read -rp "Client name:" -e -i "$(openssl rand -hex 25)" SQUID_USERNAME
-    fi
-    if [ -z "${SQUID_USERNAME}" ]; then
-      SQUID_USERNAME="$(openssl rand -hex 25)"
-    fi
+      if [ -z "${SQUID_USERNAME}" ]; then
+        echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
+        read -rp "Client name:" -e -i "$(openssl rand -hex 25)" SQUID_USERNAME
+      fi
+      if [ -z "${SQUID_USERNAME}" ]; then
+        SQUID_USERNAME="$(openssl rand -hex 25)"
+      fi
       SQUID_PASSWORD="$(openssl rand -hex 25)"
       SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
       SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)

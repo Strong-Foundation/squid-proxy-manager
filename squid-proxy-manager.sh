@@ -195,6 +195,7 @@ function headless-install() {
     SERVER_HOST_V6_SETTINGS=${SERVER_HOST_V6_SETTINGS:-1}
     SERVER_HOST_SETTINGS=${SERVER_HOST_SETTINGS:-1}
     BLOCK_TRACKERS_AND_ADS_SETTINGS=${BLOCK_TRACKERS_AND_ADS_SETTINGS:-1}
+    SQUID_USERNAME=${SQUID_USERNAME:-$(openssl rand -hex 25)}
   fi
 }
 
@@ -339,6 +340,21 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   }
 
   block-trackers-and-ads
+  
+    # What would you like to name your first WireGuard peer?
+  function client-name() {
+    if [ -z "${SQUID_USERNAME}" ]; then
+      echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
+      read -rp "Client name:" -e -i "$(openssl rand -hex 25)" SQUID_USERNAME
+    fi
+    if [ -z "${SQUID_USERNAME}" ]; then
+      SQUID_USERNAME="$(openssl rand -hex 25)"
+    fi
+  }
+
+  # Client Name
+  client-name
+
 
   function install-squid-proxy() {
     if [ ! -x "$(command -v squid)" ]; then
@@ -377,7 +393,6 @@ cache_log /dev/null" >${SQUID_CONFIG_PATH}
 http_access deny all domain_blacklist" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
-    SQUID_USERNAME="$(openssl rand -hex 25)"
     SQUID_PASSWORD="$(openssl rand -hex 25)"
     echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
     qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
@@ -432,7 +447,13 @@ else
       fi
       ;;
     4) # Add a squid user
+    if [ -z "${SQUID_USERNAME}" ]; then
+      echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
+      read -rp "Client name:" -e -i "$(openssl rand -hex 25)" SQUID_USERNAME
+    fi
+    if [ -z "${SQUID_USERNAME}" ]; then
       SQUID_USERNAME="$(openssl rand -hex 25)"
+    fi
       SQUID_PASSWORD="$(openssl rand -hex 25)"
       SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
       SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)

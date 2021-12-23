@@ -435,6 +435,8 @@ else
     4) # Add a squid user
       SQUID_USERNAME="$(openssl rand -hex 25)"
       SQUID_PASSWORD="$(openssl rand -hex 25)"
+      SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
+      SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
       echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
       qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
       echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"

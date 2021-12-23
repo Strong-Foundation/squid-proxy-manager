@@ -235,7 +235,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   choose-proxy-port
 
-  # Get the IPv4
+  # Get the IPv4 of the current server.
   function test-connectivity-v4() {
     echo "How would you like to detect IPv4?"
     echo "  1) Curl (Recommended)"

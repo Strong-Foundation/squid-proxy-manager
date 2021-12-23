@@ -482,10 +482,10 @@ else
     echo "12) Purge Squid Users"
     echo "13) List all users"
     echo "14) Update ip address"
-    until [[ "${SQUID_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_OPTIONS}" -ge 1 ] && [ "${SQUID_OPTIONS}" -le 14 ]; do
-      read -rp "Select an Option [1-14]:" -e -i 0 SQUID_OPTIONS
+    until [[ "${SQUID_MANAGER_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_MANAGER_OPTIONS}" -ge 1 ] && [ "${SQUID_MANAGER_OPTIONS}" -le 14 ]; do
+      read -rp "Select an Option [1-14]:" -e -i 0 SQUID_MANAGER_OPTIONS
     done
-    case ${SQUID_OPTIONS} in
+    case ${SQUID_MANAGER_OPTIONS} in
     1) # Start Squid
       if [ -x "$(command -v service)" ]; then
         service squid restart

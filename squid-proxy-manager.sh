@@ -232,7 +232,8 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       ;;
     esac
   }
-
+  
+  # choose what port to use for proxy.
   choose-proxy-port
 
   # Get the IPv4 of the current server.

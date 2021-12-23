@@ -223,8 +223,8 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       fi
       ;;
     2)
-      until [[ "${SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${SERVER_PORT}" -ge 1 ] && [ "${SERVER_PORT}" -le 65535 ]; do
-        read -rp "Custom port [1-65535]:" SERVER_PORT
+      until [[ "${SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${SERVER_PORT}" -ge 0 ] && [ "${SERVER_PORT}" -le 65535 ]; do
+        read -rp "Custom port [0-65535]:" SERVER_PORT
       done
       if [ "$(lsof -i UDP:"${SERVER_PORT}")" ]; then
         echo "Error: The port ${SERVER_PORT} is already used by a different application, please use a different port."
@@ -594,8 +594,8 @@ else
       ;;
     11)
       OLD_SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
-      until [[ "${NEW_SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${NEW_SERVER_PORT}" -ge 1 ] && [ "${NEW_SERVER_PORT}" -le 65535 ]; do
-        read -rp "Custom port [1-65535]: " -e -i 3128 NEW_SERVER_PORT
+      until [[ "${NEW_SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${NEW_SERVER_PORT}" -ge 0 ] && [ "${NEW_SERVER_PORT}" -le 65535 ]; do
+        read -rp "Custom port [0-65535]: " -e -i 3128 NEW_SERVER_PORT
       done
       if [ "$(lsof -i UDP:"${NEW_SERVER_PORT}")" ]; then
         echo "Error: The port ${NEW_SERVER_PORT} is already used by a different application, please use a different port."

@@ -12,10 +12,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Install squid proxy server
         run: sudo ./squid-proxy-manager.sh --install
-      - name: Start squid proxy server
-        run: sudo ./squid-proxy-manager.sh --start
       - name: Stop squid proxy server
         run: sudo ./squid-proxy-manager.sh --stop
+      - name: Start squid proxy server
+        run: sudo ./squid-proxy-manager.sh --start
       - name: Restart squid service
         run: sudo ./squid-proxy-manager.sh --restart
       - name: Add a new squid proxy user

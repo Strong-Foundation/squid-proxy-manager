@@ -506,7 +506,14 @@ else
       fi
       ;;
     11)
-      sed -i "s|current_port|new_port|g" ${SQUID_CONFIG_PATH}
+      OLD_SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}')
+      until [[ "${NEW_SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${NEW_SERVER_PORT}" -ge 1 ] && [ "${NEW_SERVER_PORT}" -le 65535 ]; do
+        read -rp "Custom port [1-65535]: " -e -i 3128 NEW_SERVER_PORT
+      done
+      if [ "$(lsof -i UDP:"${NEW_SERVER_PORT}")" ]; then
+        echo "Error: The port ${NEW_SERVER_PORT} is already used by a different application, please use a different port."
+      fi
+      sed -i "s|${OLD_SERVER_PORT}|${NEW_SERVER_PORT}|" ${SQUID_CONFIG_PATH}
       ;;
     12)
       echo "" >${SQUID_USERS_DATABASE}

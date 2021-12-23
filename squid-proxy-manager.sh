@@ -232,7 +232,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       ;;
     esac
   }
-  
+
   # choose what port to use for proxy.
   choose-proxy-port
 
@@ -324,7 +324,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   # IPv4 or IPv6 Selector
   ipvx-select
-  
+
   # real-time updates
   function enable-automatic-updates() {
     echo "Would you like to setup real-time updates?"
@@ -355,7 +355,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   # real-time updates
   enable-automatic-updates
-  
+
   # real-time backup
   function enable-automatic-backup() {
     echo "Would you like to setup real-time backup?"
@@ -603,7 +603,7 @@ else
       sed -i "s|${OLD_SERVER_PORT}|${NEW_SERVER_PORT}|" ${SQUID_CONFIG_PATH}
       ;;
     12)
-      echo "" >${SQUID_USERS_DATABASE}
+      >${SQUID_USERS_DATABASE}
       ;;
     13)
       awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}

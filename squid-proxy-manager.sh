@@ -366,7 +366,7 @@ http_access allow all
 auth_param basic program /usr/lib/squid/basic_ncsa_auth ${SQUID_USERS_DATABASE}
 acl authenticated proxy_auth REQUIRED
 http_access allow authenticated
-http_port ${SERVER_PORT}
+http_port ${SERVER_HOST}:${SERVER_PORT}
 via off
 forwarded_for delete
 follow_x_forwarded_for deny all
@@ -404,8 +404,10 @@ else
     echo "11) Update Interface Port"
     echo "12) Purge Squid Users"
     echo "13) Generate QR Code"
-    until [[ "${SQUID_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_OPTIONS}" -ge 1 ] && [ "${SQUID_OPTIONS}" -le 13 ]; do
-      read -rp "Select an Option [1-14]:" -e -i 0 SQUID_OPTIONS
+    echo "14) List all users"
+    echo "15) Update ip address"
+    until [[ "${SQUID_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_OPTIONS}" -ge 1 ] && [ "${SQUID_OPTIONS}" -le 15 ]; do
+      read -rp "Select an Option [1-15]:" -e -i 0 SQUID_OPTIONS
     done
     case ${SQUID_OPTIONS} in
     1) # Start Squid
@@ -506,7 +508,7 @@ else
       fi
       ;;
     11)
-      OLD_SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}')
+      OLD_SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
       until [[ "${NEW_SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${NEW_SERVER_PORT}" -ge 1 ] && [ "${NEW_SERVER_PORT}" -le 65535 ]; do
         read -rp "Custom port [1-65535]: " -e -i 3128 NEW_SERVER_PORT
       done
@@ -520,6 +522,17 @@ else
       ;;
     13)
       echo "Generate QR Code"
+      ;;
+    14)
+      awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
+      ;;
+    15)
+      OLD_SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
+      NEW_SERVER_HOST="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      if [ -z "${NEW_SERVER_HOST}" ]; then
+        NEW_SERVER_HOST="$(curl -4 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+      fi
+      sed -i "s/${OLD_SERVER_HOST}/${NEW_SERVER_HOST}/" ${SQUID_CONFIG_PATH}
       ;;
     esac
   }

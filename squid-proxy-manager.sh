@@ -194,6 +194,8 @@ function headless-install() {
     SERVER_HOST_V4_SETTINGS=${SERVER_HOST_V4_SETTINGS:-1}
     SERVER_HOST_V6_SETTINGS=${SERVER_HOST_V6_SETTINGS:-1}
     SERVER_HOST_SETTINGS=${SERVER_HOST_SETTINGS:-1}
+    AUTOMATIC_UPDATES_SETTINGS=${AUTOMATIC_UPDATES_SETTINGS:-1}
+    AUTOMATIC_BACKUP_SETTINGS=${AUTOMATIC_BACKUP_SETTINGS:-1}
     BLOCK_TRACKERS_AND_ADS_SETTINGS=${BLOCK_TRACKERS_AND_ADS_SETTINGS:-1}
     SQUID_USERNAME=${SQUID_USERNAME:-$(openssl rand -hex 25)}
   fi
@@ -321,6 +323,68 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
 
   # IPv4 or IPv6 Selector
   ipvx-select
+  
+  # real-time updates
+  function enable-automatic-updates() {
+    echo "Would you like to setup real-time updates?"
+    echo "  1) Yes (Recommended)"
+    echo "  2) No (Advanced)"
+    until [[ "${AUTOMATIC_UPDATES_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "Automatic Updates [1-2]:" -e -i 1 AUTOMATIC_UPDATES_SETTINGS
+    done
+    case ${AUTOMATIC_UPDATES_SETTINGS} in
+    1)
+      crontab -l | {
+        cat
+        echo "0 0 * * * ${CURRENT_FILE_PATH} --update"
+      } | crontab -
+      if pgrep systemd-journal; then
+        systemctl enable cron
+        systemctl start cron
+      else
+        service cron enable
+        service cron start
+      fi
+      ;;
+    2)
+      echo "Real-time Updates Disabled"
+      ;;
+    esac
+  }
+
+  # real-time updates
+  enable-automatic-updates
+  
+  # real-time backup
+  function enable-automatic-backup() {
+    echo "Would you like to setup real-time backup?"
+    echo "  1) Yes (Recommended)"
+    echo "  2) No (Advanced)"
+    until [[ "${AUTOMATIC_BACKUP_SETTINGS}" =~ ^[1-2]$ ]]; do
+      read -rp "Automatic Backup [1-2]:" -e -i 1 AUTOMATIC_BACKUP_SETTINGS
+    done
+    case ${AUTOMATIC_BACKUP_SETTINGS} in
+    1)
+      crontab -l | {
+        cat
+        echo "0 0 * * * ${CURRENT_FILE_PATH} --backup"
+      } | crontab -
+      if pgrep systemd-journal; then
+        systemctl enable cron
+        systemctl start cron
+      else
+        service cron enable
+        service cron start
+      fi
+      ;;
+    2)
+      echo "Real-time Backup Disabled"
+      ;;
+    esac
+  }
+
+  # real-time backup
+  enable-automatic-backup
 
   function block-trackers-and-ads() {
     echo "Do you want to block trackers and ads?"

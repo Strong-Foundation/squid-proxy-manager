@@ -416,11 +416,10 @@ else
     echo "10) Restore Squid"
     echo "11) Update Interface Port"
     echo "12) Purge Squid Users"
-    echo "13) Generate QR Code"
-    echo "14) List all users"
-    echo "15) Update ip address"
-    until [[ "${SQUID_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_OPTIONS}" -ge 1 ] && [ "${SQUID_OPTIONS}" -le 15 ]; do
-      read -rp "Select an Option [1-15]:" -e -i 0 SQUID_OPTIONS
+    echo "13) List all users"
+    echo "14) Update ip address"
+    until [[ "${SQUID_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${SQUID_OPTIONS}" -ge 1 ] && [ "${SQUID_OPTIONS}" -le 14 ]; do
+      read -rp "Select an Option [1-14]:" -e -i 0 SQUID_OPTIONS
     done
     case ${SQUID_OPTIONS} in
     1) # Start Squid
@@ -542,12 +541,9 @@ else
       echo "" >${SQUID_USERS_DATABASE}
       ;;
     13)
-      echo "Generate QR Code"
-      ;;
-    14)
       awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
       ;;
-    15)
+    14)
       OLD_SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
       NEW_SERVER_HOST="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
       if [ -z "${NEW_SERVER_HOST}" ]; then

@@ -594,6 +594,12 @@ else
       if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
         rm -rf "${SQUID_PROXY_DIRECTORY}"
       fi
+      if [ -f "${SQUID_BACKUP_PASSWORD_PATH}" ]; then
+        rm -f ${SQUID_BACKUP_PASSWORD_PATH}
+      fi
+      if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
+        rm -f ${SQUID_CONFIG_BACKUP}
+      fi
       ;;
     8)
       curl "${SQUID_MANAGER_UPDATE_URL}" -o "${CURRENT_FILE_PATH}"

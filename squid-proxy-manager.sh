@@ -443,8 +443,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
         service cron start
       fi
       ;;
-    2)
-      ;;
+    2) ;;
     esac
   }
 
@@ -640,7 +639,7 @@ else
       sed -i "s|${OLD_SERVER_PORT}|${NEW_SERVER_PORT}|" ${SQUID_CONFIG_PATH}
       ;;
     12)
-      true > ${SQUID_USERS_DATABASE}
+      true >${SQUID_USERS_DATABASE}
       ;;
     13)
       awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}

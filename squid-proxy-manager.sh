@@ -293,7 +293,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
     esac
   }
 
-  # Get the IPv6
+  # Get the IPv6 of the system
   test-connectivity-v6
 
   # What IP version would you like to be available on this squid server?

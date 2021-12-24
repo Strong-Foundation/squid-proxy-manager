@@ -420,6 +420,36 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   # Client Name
   client-name
 
+  # Automatically remove squid proxy after a period of time.
+  function auto-remove-confg() {
+    echo "Would you like to expire the peer after a certain period of time?"
+    echo "  1) Every Year (Recommended)"
+    echo "  2) No"
+    until [[ "${AUTOMATIC_CONFIG_REMOVER}" =~ ^[1-2]$ ]]; do
+      read -rp "Automatic config expire [1-2]:" -e -i 1 AUTOMATIC_CONFIG_REMOVER
+    done
+    case ${AUTOMATIC_CONFIG_REMOVER} in
+    1)
+      crontab -l | {
+        cat
+        echo "$(date +%M) $(date +%H) $(date +%d) $(date +%m) * echo -e \"${SQUID_USERNAME}\" | ${CURRENT_FILE_PATH} --remove"
+      } | crontab -
+      if pgrep systemd-journal; then
+        systemctl enable cron
+        systemctl start cron
+      else
+        service cron enable
+        service cron start
+      fi
+      ;;
+    2)
+      ;;
+    esac
+  }
+
+  # Automatic Remove Config
+  auto-remove-confg
+
   function install-squid-proxy() {
     if [ ! -x "$(command -v squid)" ]; then
       if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
@@ -523,6 +553,12 @@ else
       echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
       qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
       echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+      if crontab -l | grep -q "${CURRENT_FILE_PATH} --remove"; then
+        crontab -l | {
+          cat
+          echo "$(date +%M) $(date +%H) $(date +%d) $(date +%m) * echo -e \"${SQUID_USERNAME}\" | ${CURRENT_FILE_PATH} --remove"
+        } | crontab -
+      fi
       ;;
     5) # Remove a user
       echo "Which Squid proxy would you like to remove?"

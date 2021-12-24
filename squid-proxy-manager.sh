@@ -595,10 +595,10 @@ else
         rm -rf "${SQUID_PROXY_DIRECTORY}"
       fi
       if [ -f "${SQUID_BACKUP_PASSWORD_PATH}" ]; then
-        rm -f ${SQUID_BACKUP_PASSWORD_PATH}
+        rm -f "${SQUID_BACKUP_PASSWORD_PATH}"
       fi
       if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
-        rm -f ${SQUID_CONFIG_BACKUP}
+        rm -f "${SQUID_CONFIG_BACKUP}"
       fi
       ;;
     8)

@@ -29,9 +29,9 @@ bash /usr/local/bin/squid-proxy-manager.sh
 
 ## FAQ
 
-#### Question 1
+#### How many clients can be created?
 
-Answer 1
+As many as your heart desires.
 
 #### Question 2
 

@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 # https://github.com/complexorganizations/squid-proxy-manager
 
-# Require script to be run as root
-function super-user-check() {
-  if [ "${EUID}" -ne 0 ]; then
-    echo "Error: You need to run this script as administrator."
-    exit
+# Check if the script is running as root
+function check_root() {
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "Error: This script must be run as root."
+    exit 1
   fi
 }
 
-# Check for root
-super-user-check
-
-# Get the current system information
+# Call the function to check root privileges
+check_root
+# Function to gather current system details
 function system-information() {
+  # This function fetches the ID, version, and major version of the current system
   if [ -f /etc/os-release ]; then
-    # shellcheck disable=SC1091
+    # If /etc/os-release file is present, source it to obtain system details
+    # shellcheck source=/dev/null
     source /etc/os-release
-    CURRENT_DISTRO=${ID}
-    CURRENT_DISTRO_VERSION=${VERSION_ID}
+    CURRENT_DISTRO=${ID} # CURRENT_DISTRO holds the system's ID
   fi
 }
 
-# Get the current system information
+# Invoke the system-information function
 system-information
 
 # Pre-Checks system requirements
@@ -63,53 +63,40 @@ SQUID_USERS_DATABASE="${SQUID_PROXY_DIRECTORY}/users"
 SQUID_BACKUP_PASSWORD_PATH="${HOME}/.squid-proxy-manager"
 SYSTEM_BACKUP_PATH="/var/backups"
 SQUID_CONFIG_BACKUP="${SYSTEM_BACKUP_PATH}/squid-proxy-manager.zip"
-case $(shuf -i1-4 -n1) in
+case $(shuf -i1-1 -n1) in
 1)
   SQUID_BLOCKED_DOMAIN_URL="https://raw.githubusercontent.com/complexorganizations/content-blocker/main/assets/hosts"
   ;;
-2)
-  SQUID_BLOCKED_DOMAIN_URL="https://cdn.statically.io/gh/complexorganizations/content-blocker/main/assets/hosts"
-  ;;
-3)
-  SQUID_BLOCKED_DOMAIN_URL="https://cdn.jsdelivr.net/gh/complexorganizations/content-blocker/assets/hosts"
-  ;;
-4)
-  SQUID_BLOCKED_DOMAIN_URL="https://combinatronics.io/complexorganizations/content-blocker/main/assets/hosts"
-  ;;
 esac
-case $(shuf -i1-4 -n1) in
+case $(shuf -i1-1 -n1) in
 1)
-  SQUID_MANAGER_UPDATE_URL="https://raw.githubusercontent.com/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh"
-  ;;
-2)
-  SQUID_MANAGER_UPDATE_URL="https://cdn.statically.io/gh/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh"
-  ;;
-3)
-  SQUID_MANAGER_UPDATE_URL="https://cdn.jsdelivr.net/gh/complexorganizations/squid-proxy-manager/squid-proxy-manager.sh"
-  ;;
-4)
-  SQUID_MANAGER_UPDATE_URL="https://combinatronics.io/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh"
+  SQUID_MANAGER_UPDATE_URL="https://raw.githubusercontent.com/Strong-Foundation/squid-proxy-manager/main/squid-proxy-manager.sh"
   ;;
 esac
 
 # Usage for squid manager
 function usage-guide() {
-  echo "usage: ./$(basename "${0}") <command>"
-  echo "  --install     Install Squid Proxy"
-  echo "  --start       Start Squid Proxy"
-  echo "  --stop        Stop Squid Proxy"
-  echo "  --restart     Restart Squid Proxy"
-  echo "  --list        Show Squid Proxy(s)"
-  echo "  --add         Add Squid Proxy User"
-  echo "  --remove      Remove Squid Proxy User"
-  echo "  --reinstall   Reinstall Squid Proxy"
-  echo "  --uninstall   Uninstall Squid Proxy"
-  echo "  --update      Update Squid Proxy manager"
-  echo "  --ddns        Update squid proxy ip."
-  echo "  --backup      Backup Squid Proxy"
-  echo "  --restore     Restore Squid Proxy"
-  echo "  --purge       Purge Squid Proxy Clients"
-  echo "  --help        Show Usage Guide"
+  echo "Usage: ./$(basename "${0}") <command>"
+  echo ""
+  echo "Available Commands:"
+  echo "  --install     Installs the Squid Proxy server on the system."
+  echo "  --start       Starts the Squid Proxy service if it is installed."
+  echo "  --stop        Stops the currently running Squid Proxy service."
+  echo "  --restart     Restarts the Squid Proxy service (stops and then starts)."
+  echo "  --list        Lists all currently installed Squid Proxy instances and their status."
+  echo "  --add         Adds a new Squid Proxy user with appropriate configuration."
+  echo "  --remove      Removes an existing Squid Proxy user from the system."
+  echo "  --reinstall   Reinstalls the Squid Proxy server, ensuring a fresh configuration."
+  echo "  --uninstall   Completely removes the Squid Proxy server and its configuration files."
+  echo "  --update      Updates the Squid Proxy Manager to the latest available version."
+  echo "  --ddns        Updates the public IP of the Squid Proxy server if using dynamic DNS."
+  echo "  --backup      Creates a backup of the current Squid Proxy configuration and settings."
+  echo "  --restore     Restores the Squid Proxy server to a previous state from a backup."
+  echo "  --purge       Purges all Squid Proxy client data, including logs and configurations."
+  echo "  --help        Displays this help message with a list of available commands."
+  echo ""
+  echo "Note: Be sure to run this script with appropriate permissions to execute system commands."
+  echo "For more information on a specific command, refer to the documentation or use '--help' after the command."
 }
 
 # The usage of the script

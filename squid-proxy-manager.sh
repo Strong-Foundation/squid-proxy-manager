@@ -184,7 +184,7 @@ function headless-install() {
     AUTOMATIC_UPDATES_SETTINGS=${AUTOMATIC_UPDATES_SETTINGS:-1}
     AUTOMATIC_BACKUP_SETTINGS=${AUTOMATIC_BACKUP_SETTINGS:-1}
     BLOCK_TRACKERS_AND_ADS_SETTINGS=${BLOCK_TRACKERS_AND_ADS_SETTINGS:-1}
-    SQUID_USERNAME=${SQUID_USERNAME:-$(openssl rand -hex 25)}
+    SQUID_USERNAME=${SQUID_USERNAME:-$(openssl rand -hex 5)}
     AUTOMATIC_CONFIG_REMOVER=${AUTOMATIC_CONFIG_REMOVER:-1}
   fi
 }
@@ -398,10 +398,10 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   function client-name() {
     if [ -z "${SQUID_USERNAME}" ]; then
       echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
-      read -rp "Client name:" -e -i "$(openssl rand -hex 25)" SQUID_USERNAME
+      read -rp "Client name:" -e -i "$(openssl rand -hex 5)" SQUID_USERNAME
     fi
     if [ -z "${SQUID_USERNAME}" ]; then
-      SQUID_USERNAME="$(openssl rand -hex 25)"
+      SQUID_USERNAME="$(openssl rand -hex 5)"
     fi
   }
 
@@ -474,7 +474,7 @@ cache_log /dev/null" >${SQUID_CONFIG_PATH}
 http_access deny all domain_blacklist" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
-    SQUID_PASSWORD="$(openssl rand -hex 25)"
+    SQUID_PASSWORD="$(openssl rand -hex 5)"
     echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
     qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
     echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
@@ -529,12 +529,12 @@ else
     4) # Add a squid user
       if [ -z "${SQUID_USERNAME}" ]; then
         echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
-        read -rp "Client name:" -e -i "$(openssl rand -hex 25)" SQUID_USERNAME
+        read -rp "Client name:" -e -i "$(openssl rand -hex 5)" SQUID_USERNAME
       fi
       if [ -z "${SQUID_USERNAME}" ]; then
-        SQUID_USERNAME="$(openssl rand -hex 25)"
+        SQUID_USERNAME="$(openssl rand -hex 5)"
       fi
-      SQUID_PASSWORD="$(openssl rand -hex 25)"
+      SQUID_PASSWORD="$(openssl rand -hex 5)"
       SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
       SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
       echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
@@ -602,7 +602,7 @@ else
       ;;
     9)
       if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
-        BACKUP_PASSWORD="$(openssl rand -hex 100)"
+        BACKUP_PASSWORD="$(openssl rand -hex 5)"
         echo "${BACKUP_PASSWORD}" >"${SQUID_BACKUP_PASSWORD_PATH}"
         zip -P "${BACKUP_PASSWORD}" -rj ${SQUID_CONFIG_BACKUP} ${SQUID_CONFIG_PATH} ${SQUID_CONFIG_PATH} ${SQUID_BLOCKED_DOMAIN_PATH} ${SQUID_USERS_DATABASE}
       fi

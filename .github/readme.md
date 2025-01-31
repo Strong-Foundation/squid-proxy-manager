@@ -26,7 +26,7 @@ The project has not undergone comprehensive security audits, and the protocol is
 1. Download the script using `curl` and save it to `/usr/local/bin/`:
 
    ```bash
-   curl https://raw.githubusercontent.com/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh --create-dirs -o /usr/local/bin/squid-proxy-manager.sh
+   curl https://raw.githubusercontent.com/Strong-Foundation/squid-proxy-manager/refs/heads/main/squid-proxy-manager.sh --create-dirs -o /usr/local/bin/squid-proxy-manager.sh
    ```
 
 2. Make the script executable:
@@ -71,7 +71,7 @@ No, squid-proxy-manager is a CLI-based tool. A graphical interface is planned fo
 Run the following command to fetch the latest version:
 
 ```bash
-curl https://raw.githubusercontent.com/complexorganizations/squid-proxy-manager/main/squid-proxy-manager.sh -o /usr/local/bin/squid-proxy-manager.sh
+curl https://raw.githubusercontent.com/Strong-Foundation/squid-proxy-manager/refs/heads/main/squid-proxy-manager.sh --create-dirs -o /usr/local/bin/squid-proxy-manager.sh
 chmod +x /usr/local/bin/squid-proxy-manager.sh
 ```
 

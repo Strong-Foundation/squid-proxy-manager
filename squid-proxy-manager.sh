@@ -272,7 +272,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
     2)
       read -rp "Custom IPv6:" SERVER_HOST_V6
       if [ -z "${SERVER_HOST_V6}" ]; then
-      SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://ifconfig.co')"
+        SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://ifconfig.co')"
       fi
       if [ -z "${SERVER_HOST_V6}" ]; then
         SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
@@ -474,15 +474,191 @@ cache_log /dev/null" >${SQUID_CONFIG_PATH}
 http_access deny all domain_blacklist" >>${SQUID_CONFIG_PATH}
       curl "${SQUID_BLOCKED_DOMAIN_URL}" | awk '$1' | awk '{print "."$1""}' >${SQUID_BLOCKED_DOMAIN_PATH}
     fi
+    # Squid Proxy User Password
     SQUID_PASSWORD="$(openssl rand -hex 5)"
+    # Squid Proxy User
     echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
-    qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
-    echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+    # The Squid Proxy Connection String
+    SQUID_PROXY_CONNECTION_STRING="http://${SQUID_USERNAME}:${SQUID_PASSWORD}@${SERVER_HOST}:${SERVER_PORT}"
+    # Generate QR Code
+    qrencode -t ansiutf8 "${SQUID_PROXY_CONNECTION_STRING}"
+    # Display the Squid Proxy Connection String
+    echo "${SQUID_PROXY_CONNECTION_STRING}"
   }
 
   configure-squid-proxy
 
 else
+
+  # function to start squid proxy
+  function start-squid-proxy() {
+    if [ -x "$(command -v service)" ]; then
+      service squid restart
+    elif [ -x "$(command -v systemctl)" ]; then
+      systemctl enable squid
+      systemctl restart squid
+    fi
+  }
+
+  # Function to stop squid proxy
+  function stop-squid-proxy() {
+    if [ -x "$(command -v service)" ]; then
+      service squid stop
+    elif [ -x "$(command -v systemctl)" ]; then
+      systemctl stop squid
+    fi
+  }
+
+  # Function to restart squid proxy
+  function restart-squid-proxy() {
+    if [ -x "$(command -v service)" ]; then
+      service squid restart
+    elif [ -x "$(command -v systemctl)" ]; then
+      systemctl restart squid
+    fi
+  }
+
+  # Function to add a squid user
+  function add-squid-user() {
+    if [ -z "${SQUID_USERNAME}" ]; then
+      echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
+      read -rp "Client name:" -e -i "$(openssl rand -hex 5)" SQUID_USERNAME
+    fi
+    if [ -z "${SQUID_USERNAME}" ]; then
+      SQUID_USERNAME="$(openssl rand -hex 5)"
+    fi
+    SQUID_PASSWORD="$(openssl rand -hex 5)"
+    SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
+    SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
+    echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+    qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+    echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+    if crontab -l | grep -q "${CURRENT_FILE_PATH} --remove"; then
+      crontab -l | {
+        cat
+        echo "$(date +%M) $(date +%H) $(date +%d) $(date +%m) * echo -e \"${SQUID_USERNAME}\" | ${CURRENT_FILE_PATH} --remove"
+      } | crontab -
+    fi
+  }
+
+  # Function to remove a squid user
+  function remove-squid-user() {
+    echo "Which Squid proxy would you like to remove?"
+    awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
+    read -rp "Peer's name:" REMOVECLIENT
+    sed -i "/${REMOVECLIENT}/d" ${SQUID_USERS_DATABASE}
+  }
+
+  # Function to reinstall squid proxy
+  function reinstall-squid-proxy() {
+    if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
+      apt-get --reinstall install squid -y
+    elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
+      yum reinstall squid -y
+    elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
+      pacman -S --noconfirm squid
+    elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
+      apk fix squid
+    elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
+      pkg check squid
+    fi
+  }
+
+  # Function to uninstall squid proxy
+  function uninstall-squid-proxy() {
+    if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
+      apt-get remove squid -y
+    elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
+      yum remove squid -y
+    elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
+      pacman -Rs --noconfirm squid
+    elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
+      apk del squid
+    elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
+      pkg delete squid
+    fi
+    if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
+      rm -rf "${SQUID_PROXY_DIRECTORY}"
+    fi
+    if [ -f "${SQUID_BACKUP_PASSWORD_PATH}" ]; then
+      rm -f "${SQUID_BACKUP_PASSWORD_PATH}"
+    fi
+    if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
+      rm -f "${SQUID_CONFIG_BACKUP}"
+    fi
+  }
+
+  # Function to update squid proxy manager
+  function update-squid-proxy-manager() {
+    curl "${SQUID_MANAGER_UPDATE_URL}" -o "${CURRENT_FILE_PATH}"
+    chmod +x "${CURRENT_FILE_PATH}"
+    if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
+      curl "${SQUID_BLOCKED_DOMAIN_URL}" -o "${SQUID_BLOCKED_DOMAIN_PATH}"
+      if [ -x "$(command -v service)" ]; then
+        service squid restart
+      elif [ -x "$(command -v systemctl)" ]; then
+        systemctl restart squid
+      fi
+    fi
+  }
+
+  # Backup squid proxy
+  function backup-squid-proxy() {
+    if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
+      BACKUP_PASSWORD="$(openssl rand -hex 5)"
+      echo "${BACKUP_PASSWORD}" >"${SQUID_BACKUP_PASSWORD_PATH}"
+      zip -P "${BACKUP_PASSWORD}" -rj ${SQUID_CONFIG_BACKUP} ${SQUID_CONFIG_PATH} ${SQUID_CONFIG_PATH} ${SQUID_BLOCKED_DOMAIN_PATH} ${SQUID_USERS_DATABASE}
+    fi
+  }
+
+  # Restore squid proxy
+  function restore-squid-proxy() {
+    if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
+      if [ -f "${SQUID_CONFIG_PATH}" ]; then
+        rm -f ${SQUID_CONFIG_PATH}
+      fi
+      if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
+        rm -f ${SQUID_BLOCKED_DOMAIN_PATH}
+      fi
+      if [ -f "${SQUID_USERS_DATABASE}" ]; then
+        rm -f ${SQUID_USERS_DATABASE}
+      fi
+      unzip ${SQUID_CONFIG_BACKUP} -d ${SQUID_PROXY_DIRECTORY}
+    fi
+  }
+
+  # Function to choose the squid proxy port.
+  function choose-squid-proxy-port() {
+    OLD_SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
+    until [[ "${NEW_SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${NEW_SERVER_PORT}" -ge 0 ] && [ "${NEW_SERVER_PORT}" -le 65535 ]; do
+      read -rp "Custom port [0-65535]: " -e -i 3128 NEW_SERVER_PORT
+    done
+    if [ "$(lsof -i UDP:"${NEW_SERVER_PORT}")" ]; then
+      echo "Error: The port ${NEW_SERVER_PORT} is already used by a different application, please use a different port."
+    fi
+    sed -i "s|${OLD_SERVER_PORT}|${NEW_SERVER_PORT}|" ${SQUID_CONFIG_PATH}
+  }
+
+  # Function to purge squid users.
+  function purge-squid-users() {
+    echo "Are you sure you want to purge all squid users?"
+    echo "In the future"
+  }
+
+  # function to show all squid users.
+  function list-all-squid-users() {
+    awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
+  }
+
+  # Function to update the ip address
+  function update-ip-address() {
+    OLD_SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
+    NEW_SERVER_HOST="$(curl --ipv4 --connect-timeout 5 --tlsv1.2 --silent 'https://checkip.amazonaws.com')"
+    if [ -z "${NEW_SERVER_HOST}" ]; then
+      NEW_SERVER_HOST="$(curl --ipv4 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
+    fi
+    sed -i "s/${OLD_SERVER_HOST}/${NEW_SERVER_HOST}/" ${SQUID_CONFIG_PATH}
+  }
 
   function configure-after-installation() {
     echo "What do you want to do?"
@@ -505,145 +681,46 @@ else
     done
     case ${SQUID_MANAGER_OPTIONS} in
     1) # Start Squid
-      if [ -x "$(command -v service)" ]; then
-        service squid restart
-      elif [ -x "$(command -v systemctl)" ]; then
-        systemctl enable squid
-        systemctl restart squid
-      fi
+      start-squid-proxy
       ;;
     2) # Stop Squid
-      if [ -x "$(command -v service)" ]; then
-        service squid stop
-      elif [ -x "$(command -v systemctl)" ]; then
-        systemctl stop squid
-      fi
+      stop-squid-proxy
       ;;
     3) # Restart Squid
-      if [ -x "$(command -v service)" ]; then
-        service squid restart
-      elif [ -x "$(command -v systemctl)" ]; then
-        systemctl restart squid
-      fi
+      restart-squid-proxy
       ;;
     4) # Add a squid user
-      if [ -z "${SQUID_USERNAME}" ]; then
-        echo "Let's name the Squid proxy. Use one word only, no special characters, no spaces."
-        read -rp "Client name:" -e -i "$(openssl rand -hex 5)" SQUID_USERNAME
-      fi
-      if [ -z "${SQUID_USERNAME}" ]; then
-        SQUID_USERNAME="$(openssl rand -hex 5)"
-      fi
-      SQUID_PASSWORD="$(openssl rand -hex 5)"
-      SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
-      SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
-      echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
-      qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
-      echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
-      if crontab -l | grep -q "${CURRENT_FILE_PATH} --remove"; then
-        crontab -l | {
-          cat
-          echo "$(date +%M) $(date +%H) $(date +%d) $(date +%m) * echo -e \"${SQUID_USERNAME}\" | ${CURRENT_FILE_PATH} --remove"
-        } | crontab -
-      fi
+      add-squid-user
       ;;
     5) # Remove a user
-      echo "Which Squid proxy would you like to remove?"
-      awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
-      read -rp "Peer's name:" REMOVECLIENT
-      sed -i "/${REMOVECLIENT}/d" ${SQUID_USERS_DATABASE}
+      remove-squid-user
       ;;
     6) # Reinstall squid
-      if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
-        apt-get --reinstall install squid -y
-      elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
-        yum reinstall squid -y
-      elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
-        pacman -S --noconfirm squid
-      elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
-        apk fix squid
-      elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
-        pkg check squid
-      fi
+      reinstall-squid-proxy
       ;;
     7) # Uninstall squid
-      if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
-        apt-get remove squid -y
-      elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
-        yum remove squid -y
-      elif [ "${CURRENT_DISTRO}" == "arch" ] || [ "${CURRENT_DISTRO}" == "archarm" ] || [ "${CURRENT_DISTRO}" == "manjaro" ]; then
-        pacman -Rs --noconfirm squid
-      elif [ "${CURRENT_DISTRO}" == "alpine" ]; then
-        apk del squid
-      elif [ "${CURRENT_DISTRO}" == "freebsd" ]; then
-        pkg delete squid
-      fi
-      if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
-        rm -rf "${SQUID_PROXY_DIRECTORY}"
-      fi
-      if [ -f "${SQUID_BACKUP_PASSWORD_PATH}" ]; then
-        rm -f "${SQUID_BACKUP_PASSWORD_PATH}"
-      fi
-      if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
-        rm -f "${SQUID_CONFIG_BACKUP}"
-      fi
+      uninstall-squid-proxy
       ;;
-    8)
-      curl "${SQUID_MANAGER_UPDATE_URL}" -o "${CURRENT_FILE_PATH}"
-      chmod +x "${CURRENT_FILE_PATH}"
-      if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
-        curl "${SQUID_BLOCKED_DOMAIN_URL}" -o "${SQUID_BLOCKED_DOMAIN_PATH}"
-        if [ -x "$(command -v service)" ]; then
-          service squid restart
-        elif [ -x "$(command -v systemctl)" ]; then
-          systemctl restart squid
-        fi
-      fi
+    8) # Update the script
+      update-squid-proxy-manager
       ;;
-    9)
-      if [ -d "${SQUID_PROXY_DIRECTORY}" ]; then
-        BACKUP_PASSWORD="$(openssl rand -hex 5)"
-        echo "${BACKUP_PASSWORD}" >"${SQUID_BACKUP_PASSWORD_PATH}"
-        zip -P "${BACKUP_PASSWORD}" -rj ${SQUID_CONFIG_BACKUP} ${SQUID_CONFIG_PATH} ${SQUID_CONFIG_PATH} ${SQUID_BLOCKED_DOMAIN_PATH} ${SQUID_USERS_DATABASE}
-      fi
+    9) # Backup squid
+      backup-squid-proxy
       ;;
-    10)
-      if [ -f "${SQUID_CONFIG_BACKUP}" ]; then
-        if [ -f "${SQUID_CONFIG_PATH}" ]; then
-          rm -f ${SQUID_CONFIG_PATH}
-        fi
-        if [ -f "${SQUID_BLOCKED_DOMAIN_PATH}" ]; then
-          rm -f ${SQUID_BLOCKED_DOMAIN_PATH}
-        fi
-        if [ -f "${SQUID_USERS_DATABASE}" ]; then
-          rm -f ${SQUID_USERS_DATABASE}
-        fi
-        unzip ${SQUID_CONFIG_BACKUP} -d ${SQUID_PROXY_DIRECTORY}
-      fi
+    10) # Restore squid
+      restore-squid-proxy
       ;;
-    11)
-      OLD_SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
-      until [[ "${NEW_SERVER_PORT}" =~ ^[0-9]+$ ]] && [ "${NEW_SERVER_PORT}" -ge 0 ] && [ "${NEW_SERVER_PORT}" -le 65535 ]; do
-        read -rp "Custom port [0-65535]: " -e -i 3128 NEW_SERVER_PORT
-      done
-      if [ "$(lsof -i UDP:"${NEW_SERVER_PORT}")" ]; then
-        echo "Error: The port ${NEW_SERVER_PORT} is already used by a different application, please use a different port."
-      fi
-      sed -i "s|${OLD_SERVER_PORT}|${NEW_SERVER_PORT}|" ${SQUID_CONFIG_PATH}
+    11) # Update the interface port
+      choose-squid-proxy-port
       ;;
-    12)
-      true >${SQUID_USERS_DATABASE}
+    12) # Purge squid users
+      purge-squid-users
       ;;
-    13)
-      awk -F ':' '{print $1}' ${SQUID_USERS_DATABASE}
+    13) # List all squid users
+      alist-all-squid-users
       ;;
-    14)
-      OLD_SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
-      NEW_SERVER_HOST="$(curl --ipv4 --connect-timeout 5 --tlsv1.2 --silent 'https://checkip.amazonaws.com')"
-      if [ -z "${NEW_SERVER_HOST}" ]; then
-        NEW_SERVER_HOST="$(curl --ipv4 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
-      fi
-      sed -i "s/${OLD_SERVER_HOST}/${NEW_SERVER_HOST}/" ${SQUID_CONFIG_PATH}
+    14) # Update the ip address
+      update-ip-address
       ;;
     esac
   }

@@ -80,7 +80,7 @@ SQUID_CONFIG_PATH="${SQUID_PROXY_DIRECTORY}/squid.conf"
 # Path to the file containing blocked domains for Squid proxy
 SQUID_BLOCKED_DOMAIN_PATH="${SQUID_PROXY_DIRECTORY}/blocked-domains.acl"
 # Path to the Squid users database
-SQUID_USERS_DATABASE="${SQUID_PROXY_DIRECTORY}/users"
+SQUID_USERS_DATABASE="${SQUID_PROXY_DIRECTORY}/passwd"
 # Path to store the Squid proxy manager backup password file
 SQUID_BACKUP_PASSWORD_PATH="${HOME}/.squid-proxy-manager"
 # Path to the system backups directory
@@ -657,7 +657,7 @@ http_access deny all domain_blacklist" >>${SQUID_CONFIG_PATH}
     # Generate a random password for the Squid Proxy user
     SQUID_PASSWORD="$(openssl rand -hex 5)"
     # Add the Squid Proxy user and password to the user database
-    echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+    htpasswd -b -c ${SQUID_USERS_DATABASE} ${SQUID_USERNAME} ${SQUID_PASSWORD}
     # Construct the connection string for the Squid Proxy, which includes the username and password
     SQUID_PROXY_CONNECTION_STRING="http://${SQUID_USERNAME}:${SQUID_PASSWORD}@${SERVER_HOST}:${SERVER_PORT}"
     # Generate a QR code for the Squid Proxy connection string and print it to the terminal
@@ -722,11 +722,13 @@ else
     SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
     SERVER_PORT=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 2)
     # Add the username and password to the Squid users database (hashed password).
-    echo "${SQUID_USERNAME}:$(openssl passwd -apr1 "${SQUID_PASSWORD}")" >>${SQUID_USERS_DATABASE}
+    htpasswd -b ${SQUID_USERS_DATABASE} ${SQUID_USERNAME} ${SQUID_PASSWORD}
+    # Construct the connection string for the Squid Proxy, which includes the username and password
+    SQUID_PROXY_CONNECTION_STRING="http://${SQUID_USERNAME}:${SQUID_PASSWORD}@${SERVER_HOST}:${SERVER_PORT}"
     # Generate a QR code for the user to easily connect to the Squid proxy.
-    qrencode -t ansiutf8 "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+    qrencode -t ansiutf8 "${SQUID_PROXY_CONNECTION_STRING}"
     # Print the Squid proxy connection string.
-    echo "http://${SERVER_HOST}:${SERVER_PORT}/${SQUID_USERNAME}:${SQUID_PASSWORD}"
+    echo "${SQUID_PROXY_CONNECTION_STRING}"
     # If there is an automatic config remover set in crontab, update it to remove the user after a certain period.
     if crontab -l | grep -q "${CURRENT_FILE_PATH} --remove"; then
       crontab -l | {

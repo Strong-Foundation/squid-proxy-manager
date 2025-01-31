@@ -582,7 +582,7 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
       # Check the current distribution and install Squid accordingly
       if { [ "${CURRENT_DISTRO}" == "ubuntu" ] || [ "${CURRENT_DISTRO}" == "debian" ] || [ "${CURRENT_DISTRO}" == "raspbian" ] || [ "${CURRENT_DISTRO}" == "pop" ] || [ "${CURRENT_DISTRO}" == "kali" ] || [ "${CURRENT_DISTRO}" == "linuxmint" ] || [ "${CURRENT_DISTRO}" == "neon" ]; }; then
         # For Debian/Ubuntu-based systems, install Squid using apt
-        apt-get install squid -y
+        apt-get install squid apache2-utils -y
       elif { [ "${CURRENT_DISTRO}" == "fedora" ] || [ "${CURRENT_DISTRO}" == "centos" ] || [ "${CURRENT_DISTRO}" == "rhel" ] || [ "${CURRENT_DISTRO}" == "almalinux" ] || [ "${CURRENT_DISTRO}" == "rocky" ]; }; then
         # For Fedora/CentOS-based systems, install Squid using yum
         yum install squid -y
@@ -605,18 +605,46 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
   # Function to configure the Squid Proxy
   function configure_squid_proxy() {
     # Write the initial Squid configuration to the config file
-    echo "acl safe_ports port 0-65535
+    echo "# Define a list of safe ports (this is allowing all ports from 0 to 65535 in this case)
+acl safe_ports port 0-65535
+
+# Allow HTTP access for requests to the safe ports defined above
 http_access allow safe_ports
+
+# Allow all requests, regardless of the destination port
 http_access allow all
+
+# Configure basic authentication using the NCSA authentication helper
 auth_param basic program /usr/lib/squid/basic_ncsa_auth ${SQUID_USERS_DATABASE}
+auth_param basic realm Squid Proxy Server  # Defines the authentication realm that is shown in the prompt
+# No credential TTL specified, meaning credentials will be cached indefinitely for each user session
+
+# Define an ACL (Access Control List) for authenticated users
+# The 'proxy_auth REQUIRED' condition forces users to authenticate
 acl authenticated proxy_auth REQUIRED
+
+# Allow authenticated users to access the proxy
 http_access allow authenticated
-http_port ${SERVER_HOST}:${SERVER_PORT}
+
+# Define the proxy server’s IP address and port (using variables for dynamic configuration)
+http_port 0.0.0.0:${SERVER_PORT}
+
+# Disable the 'via' header, which is used to show the proxy server information
 via off
+
+# Delete the 'X-Forwarded-For' header, which is used to track original client IP addresses
 forwarded_for delete
+
+# Deny the use of 'X-Forwarded-For' header in forwarded requests
 follow_x_forwarded_for deny all
+
+# Disable access logging (no access log will be generated)
 access_log none
+
+# Disable the cache store log (no logs for cached objects)
 cache_store_log none
+
+# Disable the cache log (no logs for cache activity)
 cache_log /dev/null" >${SQUID_CONFIG_PATH}
     # If ad-blocking is enabled, add the necessary configuration to block domains
     if [ "${BLOCK_TRACKERS_AND_ADS}" == true ]; then

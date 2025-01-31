@@ -639,9 +639,9 @@ else
       ;;
     14)
       OLD_SERVER_HOST=$(grep http_port ${SQUID_CONFIG_PATH} | awk '{print $2}' | cut -d ":" -f 1)
-      NEW_SERVER_HOST="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      NEW_SERVER_HOST="$(curl --ipv4 --connect-timeout 5 --tlsv1.2 --silent 'https://checkip.amazonaws.com')"
       if [ -z "${NEW_SERVER_HOST}" ]; then
-        NEW_SERVER_HOST="$(curl -4 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+        NEW_SERVER_HOST="$(curl --ipv4 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
       fi
       sed -i "s/${OLD_SERVER_HOST}/${NEW_SERVER_HOST}/" ${SQUID_CONFIG_PATH}
       ;;

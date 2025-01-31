@@ -65,7 +65,7 @@ SYSTEM_BACKUP_PATH="/var/backups"
 SQUID_CONFIG_BACKUP="${SYSTEM_BACKUP_PATH}/squid-proxy-manager.zip"
 case $(shuf -i1-1 -n1) in
 1)
-  SQUID_BLOCKED_DOMAIN_URL="https://raw.githubusercontent.com/complexorganizations/content-blocker/main/assets/hosts"
+  SQUID_BLOCKED_DOMAIN_URL="https://raw.githubusercontent.com/Strong-Foundation/content-blocker/refs/heads/main/assets/hosts"
   ;;
 esac
 case $(shuf -i1-1 -n1) in
@@ -234,18 +234,18 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
     done
     case ${SERVER_HOST_V4_SETTINGS} in
     1)
-      SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      SERVER_HOST_V4="$(curl --ipv4 --connect-timeout 5 --tlsv1.2 --silent 'https://checkip.amazonaws.com')"
       if [ -z "${SERVER_HOST_V4}" ]; then
-        SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+        SERVER_HOST_V4="$(curl --ipv4 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
       fi
       ;;
     2)
       read -rp "Custom IPv4:" SERVER_HOST_V4
       if [ -z "${SERVER_HOST_V4}" ]; then
-        SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+        SERVER_HOST_V4="$(curl --ipv4 --connect-timeout 5 --tlsv1.2 --silent 'https://checkip.amazonaws.com')"
       fi
       if [ -z "${SERVER_HOST_V4}" ]; then
-        SERVER_HOST_V4="$(curl -4 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+        SERVER_HOST_V4="$(curl --ipv4 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
       fi
       ;;
     esac
@@ -264,18 +264,18 @@ if [ ! -f "${SQUID_CONFIG_PATH}" ]; then
     done
     case ${SERVER_HOST_V6_SETTINGS} in
     1)
-      SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://ifconfig.co')"
       if [ -z "${SERVER_HOST_V6}" ]; then
-        SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+        SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
       fi
       ;;
     2)
       read -rp "Custom IPv6:" SERVER_HOST_V6
       if [ -z "${SERVER_HOST_V6}" ]; then
-        SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://ifconfig.co')"
       fi
       if [ -z "${SERVER_HOST_V6}" ]; then
-        SERVER_HOST_V6="$(curl -6 --connect-timeout 5.00 -s 'https://checkip.amazonaws.com')"
+        SERVER_HOST_V6="$(curl --ipv6 --connect-timeout 5 --tlsv1.3 --silent 'https://icanhazip.com')"
       fi
       ;;
     esac
